@@ -40,10 +40,12 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(),[
            'email'=>'required|unique:users',
-           'password'=> 'required|min:8'
+           'password'=> 'required|min:8',
+           'image_user'=>'mimes:jpeg,jpg,png,gif|sometimes|max:10000'
         ],[],[
             'email'=>'البريد الإلكتروني',
-            'password'=>'كلمة المرور'
+            'password'=>'كلمة المرور',
+            'image_user'=>'صورة المستخدم'
         ]);
 
         if ($validator->fails()){
@@ -53,6 +55,15 @@ class UserController extends Controller
         }
 
         $user = new User();
+
+        if ($request->hasFile('image_user')){
+            $file = $request->file('image_user');
+            $image_name = time().'.'.$file->getClientOriginalExtension();
+            $path = 'image'.'/'.$image_name;
+            $file->move(public_path('images'),$image_name);
+            $user->image_user = $path;
+        }
+
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
